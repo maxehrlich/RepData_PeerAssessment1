@@ -18,12 +18,20 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 R-Code for reading and preparing data:
 
-```{r echo = TRUE}
+
+```r
 library(ggplot2)  # package for plots
 
 # download, unzip and read the data
 download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip",
               destfile = "activity.zip")
+```
+
+```
+## Error: unsupported URL scheme
+```
+
+```r
 unzip("activity.zip")
 activity <- read.csv("activity.csv")
 #formatting data
@@ -38,28 +46,42 @@ For this part of the assignment, you can ignore the missing values in the datase
 
 * Make a histogram of the total number of steps taken each day
 
-```{r echo = TRUE}
+
+```r
 histogramdata <- aggregate(steps ~ date, data = activity, FUN = sum)
 qplot(date, steps,	data	=	histogramdata, geom="bar", stat="identity")
 ```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
 
 * Calculate and report the mean and median total number of steps taken per day
 
 mean:
-```{r echo = TRUE}
+
+```r
 calculated_mean <- mean(histogramdata$steps)
 print(calculated_mean)
 ```
+
+```
+## [1] 10766
+```
 median:
-```{r echo = TRUE}
+
+```r
 calculated_median <- median(histogramdata$steps)
 print(calculated_median)
 ```
 
+```
+## [1] 10765
+```
+
 ## What is the average daily activity pattern?
 * Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-```{r echo = TRUE}
+
+```r
 linedata <- aggregate(steps ~ interval, data = activity, FUN = mean)
 max_interval <- linedata[which.max(linedata$steps), 
     ]$interval
@@ -68,9 +90,16 @@ ggplot(linedata, aes(x=interval, y=steps))+ geom_line()+
   scale_color_manual(name="",labels="Maximum Activity", values="red")
 ```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+
 * Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r echo=TRUE}
+
+```r
 print(c(paste("Interval with Maximum Activity: ", max_interval)))
+```
+
+```
+## [1] "Interval with Maximum Activity:  835"
 ```
 
 
@@ -79,8 +108,13 @@ Note that there are a number of days/intervals where there are missing values (c
 
 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r echo=TRUE}
+
+```r
 sum(is.na(activity))
+```
+
+```
+## [1] 2304
 ```
 
 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
@@ -89,7 +123,8 @@ Devise a strategy for filling in all of the missing values in the dataset. The s
 
 Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r echo=TRUE}
+
+```r
 nas <- is.na(activity$steps)
 activity$steps_filled<-activity$steps
 activity$steps_mean<-merge(x=activity,y=linedata,by="interval")$steps.y
@@ -99,20 +134,33 @@ activity$steps_filled[nas]<-activity$steps_mean[nas]
 
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
 
-```{r echo = TRUE}
+
+```r
 histogramdata <- aggregate(steps_filled ~ date, data = activity, FUN = sum)
 qplot(date, steps_filled,  data	=	histogramdata, geom="bar", stat="identity")
 ```
 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
+
 mean:
-```{r echo = TRUE}
+
+```r
 calculated_mean <- mean(histogramdata$steps_filled)
 print(calculated_mean)
 ```
+
+```
+## [1] 10890
+```
 median:
-```{r echo = TRUE}
+
+```r
 calculated_median <- median(histogramdata$steps_filled)
 print(calculated_median)
+```
+
+```
+## [1] 11015
 ```
 
 Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
@@ -125,7 +173,8 @@ For this part the weekdays() function may be of some help here. Use the dataset 
 
 Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r echo = TRUE}
+
+```r
 weekend <- function(date) {
     if (weekdays(as.Date(date)) %in% c("Samstag", "Sonntag")) {
         "weekend"
@@ -139,7 +188,8 @@ activity$weekend <- as.factor(sapply(activity$date, weekend))
 
 Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
-```{r echo = TRUE}
+
+```r
 par(mfrow = c(2, 1))
 for (type in c("weekend", "weekday")) {
     steps.type <- aggregate(steps ~ interval, data = activity, subset = activity$weekend == 
@@ -147,3 +197,5 @@ for (type in c("weekend", "weekday")) {
     plot(steps.type, type = "l", main = type)
 }
 ```
+
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13.png) 
